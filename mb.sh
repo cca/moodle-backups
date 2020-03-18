@@ -18,5 +18,6 @@ timestamp
 echo "Creating a compressed archive of all course backups..." >> ${HOME}/mdl-backup.log
 tar czf backups.tar.gz backup_*
 mv backups.tar.gz $HOME
+rm backup_*
 timestamp
 echo "Finished."
