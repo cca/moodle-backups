@@ -21,3 +21,7 @@ Install [moosh](https://moosh-online.com) on the Moodle server.
 1. Delete the backups file and the courses
     + Use Moodle's "Manage courses and categories" tool to delete a shared parent category, this should trickle down and delete all child courses
     + Alternatively, `ssh` back into Moodle, run del.sh to delete only the courses you backed up
+
+## LICENSE
+
+[ECL Version 2.0](https://opensource.org/licenses/ECL-2.0)
