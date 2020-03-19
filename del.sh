@@ -3,7 +3,7 @@
 COURSES=$(cat ids.txt)
 cd /opt/moodle
 
-timestamp () { date "+%Y-%m-%d %H:%m" | sed -e 's/\n/ /' >> ${HOME}/mdl-backup.log; }
+timestamp () { echo -n $(date "+%Y-%m-%d %H:%M") >> ${HOME}/mdl-backup.log; }
 
 delete () {
     timestamp
