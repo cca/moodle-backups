@@ -28,5 +28,10 @@ timestamp
 echo "Finished." >> ${HOME}/mdl-backup.log
 
 timestamp
-echo 'disk usage before backup'
+echo 'Flushing temp/backup and trashdir directories on data drive'
+rm -rf /data/temp/backup
+sudo -u www-data moosh file-delete --flush
+
+timestamp
+echo 'disk usage after backup'
 df -H >> ${HOME}/mdl-backup.log
