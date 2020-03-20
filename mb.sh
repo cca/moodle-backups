@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 COURSES=$(cat ids.txt)
+TOTAL=$(wc -l ids.txt | sed 's/ .*//')
+COUNT="1"
 cd /opt/moodle
 
 timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" " >> ${HOME}/mdl-backup.log; }
@@ -16,7 +18,9 @@ echo 'disk usage before backup'
 df -H >> ${HOME}/mdl-backup.log
 
 for id in $COURSES; do
+    echo "Backing up course ${COUNT} of ${TOTAL}"
     backup $id
+    COUNT=$(expr $COUNT + 1)
 done
 
 timestamp
