@@ -7,8 +7,13 @@ timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" " >> ${HOME}/mdl-backup.log; }
 
 backup () {
     timestamp
-    sudo -u www-data moosh course-backup $1 >> ${HOME}/mdl-backup.log
+    sudo -u www-data moosh course-backup $1 >> ${HOME}/mdl-backup.log \
+    && sudo -u www-data moosh course-delete $1 >> ${HOME}/mdl-backup.log
 }
+
+timestamp
+echo 'disk usage before backup'
+df -H >> ${HOME}/mdl-backup.log
 
 for id in $COURSES; do
     backup $id
@@ -21,3 +26,7 @@ mv backups.tar.gz $HOME
 rm backup_*
 timestamp
 echo "Finished." >> ${HOME}/mdl-backup.log
+
+timestamp
+echo 'disk usage before backup'
+df -H >> ${HOME}/mdl-backup.log
