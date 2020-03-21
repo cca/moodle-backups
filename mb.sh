@@ -5,17 +5,17 @@ TOTAL=$(wc -l ids.txt | sed 's/ .*//')
 COUNT="1"
 cd /opt/moodle
 
-timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" " >> ${HOME}/mdl-backup.log; }
+timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" " }
 
 backup () {
     timestamp
-    sudo -u www-data moosh course-backup $1 >> ${HOME}/mdl-backup.log \
-    && sudo -u www-data moosh course-delete $1 >> ${HOME}/mdl-backup.log
+    sudo -u www-data moosh course-backup $1 \
+    && sudo -u www-data moosh course-delete $1
 }
 
 timestamp
 echo 'disk usage before backup'
-df -H >> ${HOME}/mdl-backup.log
+df -H
 
 for id in $COURSES; do
     echo "Backing up course ${COUNT} of ${TOTAL}"
@@ -24,12 +24,12 @@ for id in $COURSES; do
 done
 
 timestamp
-echo "Creating a compressed archive of all course backups..." >> ${HOME}/mdl-backup.log
+echo "Creating a compressed archive of all course backups..."
 tar czf backups.tar.gz backup_*
 mv backups.tar.gz $HOME
 rm backup_*
 timestamp
-echo "Finished." >> ${HOME}/mdl-backup.log
+echo "Finished."
 
 timestamp
 echo 'Flushing temp/backup and trashdir directories on data drive'
@@ -38,4 +38,4 @@ sudo -u www-data moosh file-delete --flush
 
 timestamp
 echo 'disk usage after backup'
-df -H >> ${HOME}/mdl-backup.log
+df -H
