@@ -5,7 +5,7 @@ TOTAL=$(wc -l ids.txt | sed 's/ .*//')
 COUNT="1"
 cd /opt/moodle
 
-timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" " }
+timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" "; }
 
 backup () {
     timestamp
