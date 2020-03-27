@@ -25,9 +25,9 @@ done
 
 timestamp
 echo "Creating a compressed archive of all course backups..."
-tar czf backups.tar.gz backup_*
-mv backups.tar.gz $HOME
+tar czf /data/backups.tar.gz backup_*
 rm backup_*
+mv /data/backups.tar.gz $HOME
 timestamp
 echo "Finished."
 
