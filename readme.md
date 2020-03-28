@@ -18,9 +18,8 @@ Install [moosh](https://moosh-online.com) on the Moodle server.
 1. Run mb.sh on the server to create a compressed archive (will take a while)
 1. Exit the server, run download.sh locally
 1. Move the backups file to long-term storage
-1. Delete the backups file and the courses
+1. Delete the backups file and courses
     + Use Moodle's "Manage courses and categories" tool to delete a shared parent category, this should trickle down and delete all child courses
-    + Alternatively, `ssh` back into Moodle, run del.sh to delete only the courses you backed up
 
 ## LICENSE
 
