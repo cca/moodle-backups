@@ -38,6 +38,10 @@ I wrote a `findclass` utility for searching the compressed backup archives for p
 
 The utility returns the first backup found and exits. It exist with a non-zero status failure if no backup is found. It only works on files stored in the "backups" directory and the optional `SEMESTER` parameter expects the backup files to be named like "2018FA[.\*].tar.gz" where the [.\*] can be anything.
 
+## Course CSV "contained in" field
+
+I also wrote a python script "app.py" to help take a list of the files contained in each backup archive and add them to a spreadsheet of courses, so we don't have to use the above process to locate files. The information in "backups.py" is incomplete but the idea is that you can add the Moodle IDs contained in a backup file there, download a "courses.csv" file from the Moodle Backups Index spreadsheet, and run `python3 app.py` to create a new "modified-courses.csv" spreadsheet with a filled out "Contained In".
+
 ## LICENSE
 
 [ECL Version 2.0](https://opensource.org/licenses/ECL-2.0)
