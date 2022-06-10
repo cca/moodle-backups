@@ -8,6 +8,7 @@ function usage -d 'describes how to use this script'
     echo -e "\t$name cp 2017SU backup_3040_VISST-300-03-2017SU_2020.03.22.mbz"
 end
 
+# @TODO move to commands/copy.fish script
 function cp_backup_to_gsb -d 'copy a single backup file to GSB and then delete it locally'
     set semester (string match -r '[0-9]{4}[A-Z]{2}' "$argv[1]")
     set files $argv[2..-1]
@@ -30,8 +31,12 @@ function cp_backup_to_gsb -d 'copy a single backup file to GSB and then delete i
 end
 
 switch $argv[1]
-    case cp
-        cp_backup_to_gsb $argv[2] $argv[3..-1]
+    case create mk
+        ./commands/create.fish $argv[2..-1]
+    case download dl
+        ./commands/download.fish $argv[2..-1]
+    case copy move cp mv
+        cp_backup_to_gsb $argv[2..-1]
     case '*'
         usage
 end

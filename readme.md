@@ -1,6 +1,6 @@
 # Moodle Backups
 
-**WIP** this project is undergoing a major renovation.
+**WIP** this project is undergoing [a major renovation](https://github.com/cca/moodle-backups/projects/1).
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
@@ -14,11 +14,27 @@ Requires fish shell, [gsutil](https://cloud.google.com/storage/docs/gsutil_insta
 > glcoud install gsutil kubectl
 ```
 
-We'll need access to the Moodle Course Archive storage bucket as well as the Moodle kubernetes cluster.
+We'll need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as the Moodle kubernetes cluster.
 
-## Setup (old)
+## Move files from Drive into GSB
 
-(old) Create an ssh alias named "moodle" for your Moodle server. Install [moosh](https://moosh-online.com) on the Moodle server.
+The process to migrate from our old Drive folders to GSB.
+
+- have a local Drive folder (it can be streamed and not mirrored)
+- since the "Backups - Drive" folder is in a Shared Drive, it will not be in our local Drive filesystem, but we can create an alias in Drive so we can access it
+- enter the folder with backup files you want to transfer
+- transfer them using the `backup.fish` script, e.g.:
+  - `~/Code/aMoodle/backup.fish cp 2017FA *.mbz`
+
+## Create & store backups
+
+The complete process to backup a full semester of Moodle courses to GSB.
+
+- create a list of courses to be backed up (visible and/or > 99 views in the course logs)
+- `./backup create $ID` backup a course
+- `./backup dl --all` download its backup file
+- `./backup cp $SEMESTER $FILE` transfer the file to GSB
+- `./backup rm $ID` delete the course & its backup file on the pod
 
 ## gsutil composite objects & CRC Mod
 

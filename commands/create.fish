@@ -12,14 +12,15 @@ switch $argv[1]
         exit
 end
 
-# @TODO should be its own command because it'll be reused?
+# @TODO should be its own `namespace_check` command because it'll be reused?
 if not test $NS = moo-prod && not test $NS = moo-stg1
     set_color red
     echo 'Error: commands interacting with the remote Moodle kubernetes clusters require a NS namespace environment variable of either "moo-prod" (for production) or "moo-stg1" (for staging).'
     exit 1
 end
 
-set POD ( kubectl -n$NS get pods -o custom-columns=":metadata.name" | grep moodle)
+# @TODO this also should be its own `get_pod` command because multiple will need it
+set POD (kubectl -n$NS get pods -o custom-columns=":metadata.name" | grep moodle)
 if test -z $POD
     set_color red
     echo 'Error: unable to find the Moodle application pod.'
