@@ -1,0 +1,54 @@
+#!/usr/bin/env fish
+
+set -g TESTS 0
+set -g PASSED 0
+set -g FAILED 0
+function fail
+    set -g TESTS (math 1 + $TESTS)
+    set -g FAILED (math 1 + $FAILED)
+    set_color red
+    echo -e "❌ test failed\n"
+    set_color normal
+end
+function pass
+    set -g TESTS (math 1 + $TESTS)
+    set -g PASSED (math 1 + $PASSED)
+    set_color green
+    echo -e "✓ test passed\n"
+    set_color normal
+end
+echo "It should..."
+
+# create backup
+
+# download backup
+
+# copy backup to GSB
+set_color --bold
+echo -e "\tCopy a backup file to GSB...\n"
+set_color normal
+set FILE backup_2666_TESTS-101-01-2666TE_2022.06.21.mbz
+touch test/$FILE
+set SEMESTER 2666TE
+./backup.fish cp $SEMESTER ./test/$FILE
+gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE
+if test $status -eq 0
+    pass
+else
+    fail
+end
+gsutil rm gs://moodle-course-archive/$SEMESTER/$FILE 2&>/dev/null
+
+# delete backup from pod
+
+# summarize results
+set_color --bold
+echo -n "$PASSED/$TESTS tests passed."
+if test $FAILED -gt 0
+    set_color red
+    echo " $FAILED failure(s) - see results above."
+else
+    # trailing newline
+    echo
+end
+set_color normal

@@ -1,3 +1,4 @@
+#!/usr/bin/env fish
 function usage
     set_color --bold
     echo create
