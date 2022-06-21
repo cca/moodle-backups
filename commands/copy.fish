@@ -1,12 +1,14 @@
 #!/usr/bin/env fish
 function usage
     set_color --bold
-    echo create
+    echo copy
     set_color normal
-    echo '\tbackup cp SEMESTER FILE1 [FILE2 FILE3...]'
-    echo '\tCopy the given backup files to the SEMESTER folder in GSB.'
-    echo -e "\nExample:"
-    echo -e "\t$name cp 2017SU backup_3040_VISST-300-03-2017SU_2020.03.22.mbz"
+    echo -e '\tbackup cp SEMESTER FILE1 [FILE2 FILE3...]\n'
+    echo 'Copy the given backup files to the SEMESTER folder in GSB.'
+    echo 'This command removes the local file(s) after completion.'
+    echo -e "\nExamples:"
+    echo -e "\t./backup.fish cp 2017SU backup_3040_VISST-300-03-2017SU_2020.03.22.mbz"
+    echo -e "\t./backup.fish cp 2017FA *.mbz"
 end
 
 switch $argv[1]
