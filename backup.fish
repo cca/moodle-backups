@@ -16,7 +16,7 @@ switch $argv[1]
         ./commands/download.fish $argv[2..-1]
     case copy move cp mv
         ./commands/copy.fish $argv[2..-1]
-    case rm remove del delete
+    case rm remove delete
         ./commands/delete.fish $argv[2..-1]
     case '*'
         usage

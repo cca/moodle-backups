@@ -21,28 +21,67 @@ source ./lib/k8s.fish
 # run tests against the staging cluster
 set -gx NS moo-stg1
 set -gx POD (get_pod)
+set BACKUPS_PATH /bitnami/moodledata/backups
 
 # create backup
 function create
-    check_namespace
     set_color --bold
     echo -e "\tCreate a backup file on the Moodle pod...\n"
     set_color normal
-    # ep test course https://moodle-stg-1.cca.edu/course/view.php?id=3606
-    ./backup.fish mk 3606
-    kubectl exec -n$NS $POD -- ls /bitnami/moodledata/backups/ | grep backup_3606 2&>/dev/null
+
+    # requires a test course in staging, use TEST_COURSE env var
+    # or Eric's hard-coded one here https://moodle-stg-1.cca.edu/course/view.php?id=3606
+    set -q TEST_COURSE || set TEST_COURSE 3606
+
+    ./backup.fish mk $TEST_COURSE
+    kubectl exec -n$NS $POD -- ls $BACKUPS_PATH | grep backup_$TEST_COURSE 2&>/dev/null
     if test $status -eq 0
         pass
     else
         fail
     end
+
     kubectl exec -n$NS $POD -- sh -c 'rm /bitnami/moodledata/backups/backup_3606*'
 end
 
 # download backup
 function download
-    check_namespace
-    true
+    set_color --bold
+    echo -e "\tDownload one file at a time from Moodle...\n"
+    set_color normal
+
+    # create fake backup files
+    set file1 backup_2666_ANIMA-1001-01-2666TE_2666.06.03.mbz
+    set file2 backup_2667_WRLIT-4444-04-2666TE_2666.06.03.mbz
+    for file in $file1 $file2
+        kubectl exec -n$NS $POD -- touch $BACKUPS_PATH/$file
+    end
+
+    ./backup.fish dl $file1
+    ls data | grep $file1 >/dev/null
+    if test $status -eq 0
+        pass
+    else
+        fail
+    end
+    rm data/$file1
+
+    set_color --bold
+    echo -e "\tDownload the entire backups folder from Moodle...\n"
+    set_color normal
+
+    ./backup.fish dl --all
+    ls data | grep $file1 >/dev/null; and ls data | grep $file2 >/dev/null
+    if test $status -eq 0
+        pass
+    else
+        fail
+    end
+
+    for file in $file1 $file2
+        kubectl exec -n$NS $POD -- rm $BACKUPS_PATH/$file
+        rm data/$file
+    end
 end
 
 # copy backup to GSB
@@ -50,22 +89,24 @@ function copy
     set_color --bold
     echo -e "\tCopy a backup file to GSB...\n"
     set_color normal
+
     set FILE backup_2666_TESTS-101-01-2666TE_2022.06.21.mbz
     touch test/$FILE
     set SEMESTER 2666TE
+
     ./backup.fish cp $SEMESTER ./test/$FILE
-    gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE
+    gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE >/dev/null
     if test $status -eq 0
         pass
     else
         fail
     end
+
     gsutil rm gs://moodle-course-archive/$SEMESTER/$FILE 2&>/dev/null
 end
 
 # delete backup & course from pod
 function delete
-    check_namespace
     true
 end
 

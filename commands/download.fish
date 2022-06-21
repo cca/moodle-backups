@@ -1,20 +1,38 @@
 #!/usr/bin/env fish
 function usage
     set_color --bold
-    echo create
+    echo download
     set_color normal
-    echo '\tbackup dl [FILE FILE2 | --all]'
-    echo '\tDownload backup files from the Moodle server.'
+    echo -e '\t./backup.fish dl [ FILE1 FILE2 FILE3... | --all ]\n'
+    echo 'Download backup files from the Moodle server into the "data" directory.'
+    echo -e "\nExamples:"
+    echo -e "\t./backup.fish download backup_3606_ANIMA-1001-01_2022.06.21.mbz"
+    echo -e "\t./backup.fish dl --all"
 end
 
 switch $argv[1]
-    case -h h --help help
+    case -h h --help help ''
         usage
         exit
 end
 
-set BACKUPS_PATH /bitnami/moodledata/backups
-if contains --all $argv
-    # @TODO make this work
-    kubectl cp $NS/$POD:$BACKUPS_PATH ../data
+source ./lib/k8s.fish
+check_namespace
+set -gx POD (get_pod)
+set BACKUPS_PATH bitnami/moodledata/backups
+
+if contains -- --all $argv
+    echo "Downloading the contents of $BACKUPS_PATH"
+    kubectl cp $NS/$POD:$BACKUPS_PATH data
+else
+    for file in $argv
+        if string match "$BACKUPS_PATH*" $file 2&>/dev/null
+            # full path was specified
+            echo "Downloading" (basename $file)
+            kubectl cp $NS/$POD:$file data/(basename $file)
+        else
+            echo "Downloading $file"
+            kubectl cp $NS/$POD:$BACKUPS_PATH/$file data/$file
+        end
+    end
 end

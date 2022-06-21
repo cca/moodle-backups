@@ -31,8 +31,8 @@ The process to migrate from our old Drive folders to GSB.
 The complete process to backup a full semester of Moodle courses to GSB.
 
 - [ ] create a list of courses to be backed up (visible and/or > 99 views in the course logs)
-- [ ] `./backup create $ID` backup a course
-- [ ] `./backup dl --all` download its backup file
+- [x] `./backup create $ID` backup a course
+- [x] `./backup dl --all` download its backup file
 - [x] `./backup cp $SEMESTER $FILE` transfer the file to GSB
 - [ ] `./backup rm $ID` delete the course & its backup file on the pod
 

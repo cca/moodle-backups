@@ -19,11 +19,11 @@ end
 source ./lib/k8s.fish
 
 check_namespace
-get_pod
 set POD (get_pod)
 set MOODLE_PATH /bitnami/moodle
 set BACKUPS_PATH /bitnami/moodledata/backups
 
+# @TODO should we give an option to pass the --overwrite flag onto moosh course-backup?
 for course in $argv
     echo "Creating backup of course no. $course"
     # this prints a lot of noise but the final message is the complete path of the .mbz file

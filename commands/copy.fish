@@ -12,7 +12,7 @@ function usage
 end
 
 switch $argv[1]
-    case -h h --help help
+    case -h h --help help ''
         usage
         exit
 end
