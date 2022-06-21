@@ -36,6 +36,17 @@ The complete process to backup a full semester of Moodle courses to GSB.
 - [x] `./backup cp $SEMESTER $FILE` transfer the file to GSB
 - [ ] `./backup rm $ID` delete the course & its backup file on the pod
 
+## Testing
+
+```sh
+> # run all tests
+> test/test
+> # test a specific command (or set of commands)
+> test/test create
+```
+
+Tests run against the staging Moodle cluster. The ID for a particular course in staging (3606) is hard-coded into one test but can be overridden with a `TEST_COURSE` enrivonment variable.
+
 ## gsutil composite objects & CRC Mod
 
 `gsutil` prints this notice if we try to upload a large file:
