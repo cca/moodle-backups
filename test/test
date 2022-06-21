@@ -17,29 +17,75 @@ function pass
     echo -e "✓ test passed\n"
     set_color normal
 end
-echo "It should..."
+source ./lib/k8s.fish
+# run tests against the staging cluster
+set -gx NS moo-stg1
+set -gx POD (get_pod)
 
 # create backup
+function create
+    check_namespace
+    set_color --bold
+    echo -e "\tCreate a backup file on the Moodle pod...\n"
+    set_color normal
+    # ep test course https://moodle-stg-1.cca.edu/course/view.php?id=3606
+    ./backup.fish mk 3606
+    kubectl exec -n$NS $POD -- ls /bitnami/moodledata/backups/ | grep backup_3606 2&>/dev/null
+    if test $status -eq 0
+        pass
+    else
+        fail
+    end
+    kubectl exec -n$NS $POD -- sh -c 'rm /bitnami/moodledata/backups/backup_3606*'
+end
 
 # download backup
+function download
+    check_namespace
+    true
+end
 
 # copy backup to GSB
-set_color --bold
-echo -e "\tCopy a backup file to GSB...\n"
-set_color normal
-set FILE backup_2666_TESTS-101-01-2666TE_2022.06.21.mbz
-touch test/$FILE
-set SEMESTER 2666TE
-./backup.fish cp $SEMESTER ./test/$FILE
-gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE
-if test $status -eq 0
-    pass
-else
-    fail
+function copy
+    set_color --bold
+    echo -e "\tCopy a backup file to GSB...\n"
+    set_color normal
+    set FILE backup_2666_TESTS-101-01-2666TE_2022.06.21.mbz
+    touch test/$FILE
+    set SEMESTER 2666TE
+    ./backup.fish cp $SEMESTER ./test/$FILE
+    gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE
+    if test $status -eq 0
+        pass
+    else
+        fail
+    end
+    gsutil rm gs://moodle-course-archive/$SEMESTER/$FILE 2&>/dev/null
 end
-gsutil rm gs://moodle-course-archive/$SEMESTER/$FILE 2&>/dev/null
 
-# delete backup from pod
+# delete backup & course from pod
+function delete
+    check_namespace
+    true
+end
+
+echo "It should..."
+# make individual tests runnable
+switch $argv[1]
+    case ''
+        create
+        download
+        copy
+        delete
+    case create
+        create
+    case download
+        download
+    case copy
+        copy
+    case delete
+        delete
+end
 
 # summarize results
 set_color --bold
