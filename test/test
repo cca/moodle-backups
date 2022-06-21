@@ -17,6 +17,13 @@ function pass
     echo -e "✓ test passed\n"
     set_color normal
 end
+function check_result
+    if test $status -eq 0
+        pass
+    else
+        fail
+    end
+end
 source ./lib/k8s.fish
 # run tests against the staging cluster
 set -gx NS moo-stg1
@@ -35,11 +42,7 @@ function create
 
     ./backup.fish mk $TEST_COURSE
     kubectl exec -n$NS $POD -- ls $BACKUPS_PATH | grep backup_$TEST_COURSE 2&>/dev/null
-    if test $status -eq 0
-        pass
-    else
-        fail
-    end
+    check_result
 
     kubectl exec -n$NS $POD -- sh -c 'rm /bitnami/moodledata/backups/backup_3606*'
 end
@@ -59,11 +62,7 @@ function download
 
     ./backup.fish dl $file1
     ls data | grep $file1 >/dev/null
-    if test $status -eq 0
-        pass
-    else
-        fail
-    end
+    check_result
     rm data/$file1
 
     set_color --bold
@@ -72,11 +71,7 @@ function download
 
     ./backup.fish dl --all
     ls data | grep $file1 >/dev/null; and ls data | grep $file2 >/dev/null
-    if test $status -eq 0
-        pass
-    else
-        fail
-    end
+    check_result
 
     for file in $file1 $file2
         kubectl exec -n$NS $POD -- rm $BACKUPS_PATH/$file
@@ -96,11 +91,7 @@ function copy
 
     ./backup.fish cp $SEMESTER ./test/$FILE
     gsutil ls gs://moodle-course-archive/$SEMESTER/$FILE >/dev/null
-    if test $status -eq 0
-        pass
-    else
-        fail
-    end
+    check_result
 
     gsutil rm gs://moodle-course-archive/$SEMESTER/$FILE 2&>/dev/null
 end
