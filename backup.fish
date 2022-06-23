@@ -11,13 +11,13 @@ end
 
 switch $argv[1]
     case create mk
-        ./commands/create.fish $argv[2..-1]
+        fish (status dirname)/commands/create.fish $argv[2..-1]
     case download dl
-        ./commands/download.fish $argv[2..-1]
+        fish (status dirname)/commands/download.fish $argv[2..-1]
     case copy move cp mv
-        ./commands/copy.fish $argv[2..-1]
+        fish (status dirname)/commands/copy.fish $argv[2..-1]
     case rm remove delete
-        ./commands/delete.fish $argv[2..-1]
+        fish (status dirname)/commands/delete.fish $argv[2..-1]
     case '*'
         usage
 end

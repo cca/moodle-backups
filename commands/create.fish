@@ -16,7 +16,7 @@ switch $argv[1]
         exit
 end
 
-source ./lib/k8s.fish
+source (status dirname)/../lib/k8s.fish
 
 check_namespace
 set POD (get_pod)

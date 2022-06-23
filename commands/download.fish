@@ -16,7 +16,7 @@ switch $argv[1]
         exit
 end
 
-source ./lib/k8s.fish
+source (status dirname)/../lib/k8s.fish
 check_namespace
 set -gx POD (get_pod)
 set BACKUPS_PATH bitnami/moodledata/backups
@@ -28,7 +28,7 @@ else
     for file in $argv
         if string match "$BACKUPS_PATH*" $file 2&>/dev/null
             # full path was specified
-            echo "Downloading" (basename $file)
+            echo Downloading (basename $file)
             kubectl cp $NS/$POD:$file data/(basename $file)
         else
             echo "Downloading $file"
