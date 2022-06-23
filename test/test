@@ -29,6 +29,7 @@ source ./lib/k8s.fish
 set -gx NS moo-stg1
 set -gx POD (get_pod)
 set BACKUPS_PATH /bitnami/moodledata/backups
+set MOODLE_PATH /bitnami/moodle
 
 # create backup
 function create
@@ -98,7 +99,14 @@ end
 
 # delete backup & course from pod
 function delete
-    true
+    # create a test course
+    kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-create TESTS-1001-01
+    # need to get the course ID from output of above cmd
+    # create a backup of the test course
+    kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-backup --path $BACKUPS_PATH $course
+    # delete them both
+    ./backup.fish rm $course
+    check_result
 end
 
 echo "It should..."
