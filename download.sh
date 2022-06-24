@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
-rsync -vhP moodle:~/mdl-backup.log data/$(date "+%Y-%m-%d").log
-rsync -vhP moodle:~/backups.tar.gz backups
-ssh moodle 'rm -v ~/backups.tar.gz'
+rsync -vhP ma:~/backups/log.txt data/$(date "+%Y-%m-%d").log
+rsync -vhP ma:~/backups.tar backups && ssh ma 'rm -v ~/backups.tar'

@@ -3,13 +3,14 @@
 COURSES=$(cat ids.txt)
 TOTAL=$(wc -l ids.txt | sed 's/ .*//')
 COUNT="1"
+mkdir -p /Users/ephetteplace/backups
 cd /opt/moodle
 
 timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" "; }
 
 backup () {
     timestamp
-    sudo -u www-data moosh course-backup $1 \
+    sudo -u www-data moosh course-backup --path /Users/ephetteplace/backups $1 \
     && sudo -u www-data moosh course-delete $1
 }
 
@@ -25,15 +26,13 @@ done
 
 timestamp
 echo "Creating a compressed archive of all course backups..."
-tar czf /data/backups.tar.gz backup_*
-rm backup_*
-mv /data/backups.tar.gz $HOME
+tar cf /Users/ephetteplace/backups.tar /Users/ephetteplace/backups/backup_*
+rm /Users/ephetteplace/backups/backup_*
 timestamp
 echo "Finished."
 
 timestamp
 echo 'Flushing temp/backup and trashdir directories on data drive'
-rm -rf /data/temp/backup
 sudo -u www-data moosh file-delete --flush
 
 timestamp
