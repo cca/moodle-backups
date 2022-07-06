@@ -34,7 +34,7 @@ The complete process to backup a full semester of Moodle courses to GSB.
 - [x] `./backup create $ID` backup a course
 - [x] `./backup dl --all` download its backup file
 - [x] `./backup cp $SEMESTER $FILE` transfer the file to GSB
-- [ ] `./backup rm $ID` delete the course & its backup file on the pod
+- [x] `./backup rm $ID` delete the course & its backup file on the pod
 
 ## Testing
 

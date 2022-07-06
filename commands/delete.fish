@@ -45,7 +45,6 @@ else
     for course in $argv
         delete_course $course
         if test $status -eq 0
-            # @TODO does escaping the _ after $course work like this?
             kubectl exec -n$NS $POD -- sh -c "rm -v $BACKUPS_PATH/backup_$course\_*"
         else
             echo "Error deleting course no. $course - the backup file $file will not be deleted" 1>&2

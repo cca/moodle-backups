@@ -24,6 +24,11 @@ function check_result
         fail
     end
 end
+function heading
+    set_color --bold
+    echo -e "\t$argv...\n"
+    set_color normal
+end
 source ./lib/k8s.fish
 # run tests against the staging cluster
 set -gx NS moo-stg1
@@ -33,9 +38,7 @@ set MOODLE_PATH /bitnami/moodle
 
 # create backup
 function create
-    set_color --bold
-    echo -e "\tCreate a backup file on the Moodle pod...\n"
-    set_color normal
+    heading 'Create a backup file on the Moodle pod'
 
     # requires a test course in staging, use TEST_COURSE env var
     # or Eric's hard-coded one here https://moodle-stg-1.cca.edu/course/view.php?id=3606
@@ -50,9 +53,7 @@ end
 
 # download backup
 function download
-    set_color --bold
-    echo -e "\tDownload one file at a time from Moodle...\n"
-    set_color normal
+    heading 'Download one file at a time from Moodle'
 
     # create fake backup files
     set file1 backup_2666_ANIMA-1001-01-2666TE_2666.06.03.mbz
@@ -66,9 +67,7 @@ function download
     check_result
     rm data/$file1
 
-    set_color --bold
-    echo -e "\tDownload the entire backups folder from Moodle...\n"
-    set_color normal
+    heading 'Download the entire backups folder from Moodle'
 
     ./backup.fish dl --all
     ls data | grep $file1 >/dev/null; and ls data | grep $file2 >/dev/null
@@ -82,9 +81,7 @@ end
 
 # copy backup to GSB
 function copy
-    set_color --bold
-    echo -e "\tCopy a backup file to GSB...\n"
-    set_color normal
+    heading 'Copy a backup file to GSB'
 
     set FILE backup_2666_TESTS-101-01-2666TE_2022.06.21.mbz
     touch test/$FILE
@@ -99,11 +96,13 @@ end
 
 # delete backup & course from pod
 function delete
+    heading 'Delete the local course & its backup'
+
     # create a test course
-    kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-create TESTS-1001-01
+    set course (kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-create TESTS-1001-01) >/dev/null
     # need to get the course ID from output of above cmd
     # create a backup of the test course
-    kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-backup --path $BACKUPS_PATH $course
+    kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-backup --path $BACKUPS_PATH $course 2&>/dev/null
     # delete them both
     ./backup.fish rm $course
     check_result
