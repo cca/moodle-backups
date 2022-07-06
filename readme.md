@@ -4,11 +4,11 @@
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
-We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and more programmatically accessible with the scripts here. We have a spreadsheet index of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
+We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and make backups more programmatically accessible. We have a spreadsheet index of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
 
 ## Setup
 
-Requires fish shell, [gsutil](https://cloud.google.com/storage/docs/gsutil_install), and kubectl. Fish and kubectl are in [homebrew](https://brew.sh).
+Requires [fish shell](https://fishshell.com/), [gsutil](https://cloud.google.com/storage/docs/gsutil_install), and [kubectl](https://kubernetes.io/docs/reference/kubectl/). Fish and kubectl are in [homebrew](https://brew.sh).
 
 ```sh
 > brew install fish kubectl
@@ -16,18 +16,18 @@ Requires fish shell, [gsutil](https://cloud.google.com/storage/docs/gsutil_insta
 > glcoud install gsutil kubectl
 ```
 
-We'll need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as the Moodle kubernetes cluster.
+We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters.
 
 ## Create & store backups
 
 The complete process to backup a full semester of Moodle courses to GSB.
 
 - [ ] create a list of courses to be backed up (criteria TBD)
-- [x] `./backup create $ID` backup a course
-- [x] `./backup dl --all` download its backup file
-- [x] `./backup cp $SEMESTER $FILE` transfer the file to GSB
-- [x] `./backup rm $ID` delete the course & its backup file on the pod
-- [ ] `./backup retrieve $ID` retrieve backup from archive
+- [x] `./backup create $ID` loop over the list, backing up each course
+- [x] `./backup dl --all` download the backup file(s)
+- [x] `./backup cp $SEMESTER $FILE` transfer the file(s) to GSB
+- [x] `./backup rm $ID` delete the course(s) & their backup file(s) on the pod
+- [ ] `./backup retrieve $ID` retrieve a backup from the archive
 
 ## Testing
 
@@ -53,7 +53,7 @@ parallel_composite_upload_threshold = 100M
 parallel_composite_upload_component_size = 50M
 ```
 
-Alternatively, we can set the `parallel_composite_upload_threshold` to `0` to disable this message and then the `gsutil` clients that download files added without the parallel composite upload won't need crcmod. In testing, files uploaded as composite objects are able to be downloaded via the Google Cloud Console, so they can still be accessed from machines without a compiled crcmod.
+Alternatively, set the `parallel_composite_upload_threshold` to `0` to disable this message and then the `gsutil` clients that download files added without the parallel composite upload won't need crcmod. In testing, files uploaded as composite objects are able to be downloaded via the Google Cloud Console, so they can still be accessed from machines without a compiled crcmod.
 
 ## LICENSE
 
