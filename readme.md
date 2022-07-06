@@ -4,6 +4,8 @@
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
+We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and more programmatically accessible with the scripts here. We have a spreadsheet index of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
+
 ## Setup
 
 Requires fish shell, [gsutil](https://cloud.google.com/storage/docs/gsutil_install), and kubectl. Fish and kubectl are in [homebrew](https://brew.sh).
@@ -16,25 +18,16 @@ Requires fish shell, [gsutil](https://cloud.google.com/storage/docs/gsutil_insta
 
 We'll need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as the Moodle kubernetes cluster.
 
-## Move files from Drive into GSB
-
-The process to migrate from our old Drive folders to GSB.
-
-- have a local Drive folder (it can be streamed and not mirrored)
-- since the "Backups - Drive" folder is in a Shared Drive, it will not be in our local Drive filesystem, but we can create an alias in Drive so we can access it
-- enter the folder with backup files you want to transfer
-- transfer them using the `backup.fish` script, e.g.:
-  - `~/Code/aMoodle/backup.fish cp 2017FA *.mbz`
-
 ## Create & store backups
 
 The complete process to backup a full semester of Moodle courses to GSB.
 
-- [ ] create a list of courses to be backed up (visible and/or > 99 views in the course logs)
+- [ ] create a list of courses to be backed up (criteria TBD)
 - [x] `./backup create $ID` backup a course
 - [x] `./backup dl --all` download its backup file
 - [x] `./backup cp $SEMESTER $FILE` transfer the file to GSB
 - [x] `./backup rm $ID` delete the course & its backup file on the pod
+- [ ] `./backup retrieve $ID` retrieve backup from archive
 
 ## Testing
 
@@ -45,7 +38,7 @@ The complete process to backup a full semester of Moodle courses to GSB.
 > test/test create
 ```
 
-Tests run against the staging Moodle cluster. The ID for a particular course in staging (3606) is hard-coded into one test but can be overridden with a `TEST_COURSE` enrivonment variable.
+Tests run against the staging Moodle cluster. The ID for a particular course (3606) in our staging instance is hard-coded into one test but can be overridden with a `TEST_COURSE` enrivonment variable.
 
 ## gsutil composite objects & CRC Mod
 
