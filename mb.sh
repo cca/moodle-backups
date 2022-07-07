@@ -12,8 +12,8 @@ timestamp () { echo -n $(date "+%Y-%m-%d %H:%M")" "; }
 
 backup () {
     timestamp
-    sudo moosh -n course-backup --path ${BACKUPS_DIR} $1 \
-    && sudo moosh -n course-delete $1
+    sudo moosh -n course-backup --path ${BACKUPS_DIR} $1
+    # && sudo moosh -n course-delete $1
 }
 
 timestamp
