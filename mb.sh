@@ -28,8 +28,8 @@ done
 
 timestamp
 echo "Creating a compressed archive of all course backups..."
-tar cf /Users/ephetteplace/backups.tar ${BACKUPS_DIR}/backup_*
-rm ${BACKUPS_DIR}/backup_*
+tar cf /Users/ephetteplace/backups.tar ${BACKUPS_DIR}/backup_* \
+    && rm ${BACKUPS_DIR}/backup_*
 timestamp
 echo "Finished."
 
