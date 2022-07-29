@@ -7,6 +7,8 @@ function usage -d 'describes how to use this script'
     echo -e "\t./$name dl [ COURSE1 COURSE2... | --all ] - download specific, or all, backup files from the Moodle pod"
     echo -e "\t./$name cp SEMESTER FILE1 [FILE2 FILE3...] - copy backup file(s) to SEMESTER folder in GSB"
     echo -e "\t./$name rm COURSE - delete the backup file and course from the Moodle pod"
+    echo -e "\t./$name ret QUERY - find & download the course backup from GSB"
+    echo -e "\nFor additional usage information, use a -h or --help flag on any subcommand."
 end
 
 switch $argv[1]
@@ -18,6 +20,8 @@ switch $argv[1]
         fish (status dirname)/commands/copy.fish $argv[2..-1]
     case rm remove delete
         fish (status dirname)/commands/delete.fish $argv[2..-1]
+    case ret retrieve
+        fish (status dirname)/commands/retrieve.fish $argv[2..-1]
     case '*'
         usage
 end

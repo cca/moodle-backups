@@ -1,7 +1,5 @@
 # Moodle Backups
 
-**WIP** this project is undergoing [a major renovation](https://github.com/cca/moodle-backups/projects/1).
-
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
 We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and make backups more programmatically accessible. We have a spreadsheet index of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
@@ -22,12 +20,12 @@ We'll also need access to the [Moodle Course Archive](https://console.cloud.goog
 
 The complete process to backup a full semester of Moodle courses to GSB.
 
-- [ ] create a list of courses to be backed up (criteria TBD)
+- [x] create a list of courses to be backed up (see our reports)
 - [x] `./backup create $ID` loop over the list, backing up each course
 - [x] `./backup dl --all` download the backup file(s)
 - [x] `./backup cp $SEMESTER $FILE` transfer the file(s) to GSB
 - [x] `./backup rm $ID` delete the course(s) & their backup file(s) on the pod
-- [ ] `./backup retrieve $ID` retrieve a backup from the archive
+- [X] `./backup retrieve $QUERY` retrieve a backup from the archive
 
 ## Testing
 
