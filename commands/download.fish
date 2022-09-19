@@ -19,7 +19,7 @@ end
 source (status dirname)/../lib/k8s.fish
 check_namespace
 set -gx POD (get_pod)
-set BACKUPS_PATH bitnami/moodledata/backups
+set BACKUPS_PATH opt/moodledata/backups
 
 if contains -- --all $argv
     echo "Downloading the contents of $BACKUPS_PATH"

@@ -37,7 +37,7 @@ if test (kubectl config current-context) != $ctx
     kubectl config set-context $ctx
 end
 set -gx POD (get_pod)
-set BACKUPS_PATH /bitnami/moodledata/backups
+set BACKUPS_PATH /opt/moodledata/backups
 set MOODLE_PATH /bitnami/moodle
 
 # create backup
@@ -52,7 +52,7 @@ function create
     kubectl exec -n$NS $POD -- ls $BACKUPS_PATH | grep backup_$TEST_COURSE 2&>/dev/null
     check_result
 
-    kubectl exec -n$NS $POD -- sh -c 'rm /bitnami/moodledata/backups/backup_3606*'
+    kubectl exec -n$NS $POD -- sh -c "rm $BACKUPS_PATH/backup_3606*"
 end
 
 # download backup

@@ -21,7 +21,7 @@ source (status dirname)/../lib/k8s.fish
 check_namespace
 set POD (get_pod)
 set MOODLE_PATH /bitnami/moodle
-set BACKUPS_PATH /bitnami/moodledata/backups
+set BACKUPS_PATH /opt/moodledata/backups
 
 function delete_course
     kubectl exec -n$NS $POD -- moosh --no-user-check --moodle-path $MOODLE_PATH course-delete $argv[1]

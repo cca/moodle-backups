@@ -21,7 +21,7 @@ source (status dirname)/../lib/k8s.fish
 check_namespace
 set POD (get_pod)
 set MOODLE_PATH /bitnami/moodle
-set BACKUPS_PATH /bitnami/moodledata/backups
+set BACKUPS_PATH /opt/moodledata/backups
 
 # create backups dir in case it does not already exist
 kubectl exec -n$NS $POD -- mkdir -p $BACKUPS_PATH
