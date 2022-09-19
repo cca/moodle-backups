@@ -26,6 +26,8 @@ if contains -- --all $argv
     kubectl cp $NS/$POD:$BACKUPS_PATH data
 else
     for file in $argv
+        # trim leading slash
+        set file (string replace -r '^/' '' $file)
         if string match "$BACKUPS_PATH*" $file 2&>/dev/null
             # full path was specified
             echo Downloading (basename $file)
