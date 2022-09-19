@@ -2,7 +2,7 @@
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
-We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and make backups more programmatically accessible. We have a spreadsheet index of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
+We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and make backups more programmatically accessible. We have [a spreadsheet index](https://docs.google.com/spreadsheets/d/1mxO2PbKk088R9e3rU_XwUpxV_HwzIKBiIrK1xPy3zfU/edit?usp=sharing) of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
 
 ## Setup
 
@@ -16,16 +16,19 @@ Requires [fish shell](https://fishshell.com/), [gsutil](https://cloud.google.com
 
 We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters.
 
-## Create & store backups
+## Workflow
 
-The complete process to backup a full semester of Moodle courses to GSB.
+The complete process to backup a full semester of Moodle courses to GSB:
 
-- [x] create a list of courses to be backed up (see our reports)
-- [x] `./backup create $ID` loop over the list, backing up each course
-- [x] `./backup dl --all` download the backup file(s)
-- [x] `./backup cp $SEMESTER $FILE` transfer the file(s) to GSB
-- [x] `./backup rm $ID` delete the course(s) & their backup file(s) on the pod
-- [X] `./backup retrieve $QUERY` retrieve a backup from the archive
+- create a list of courses to be backed up (see SQL folder & our reports)
+- `./backup create 1 2 3 4` backup courses from a list of IDs
+- `./backup dl --all` download all the backup files to the data dir
+- `./backup cp $SEMESTER data/backup_*` transfer the files to GSB (note: try to avoid copying any test files in the data dir)
+- `./backup rm --all` delete the courses & their backups on the pod
+
+Rather than doing an entire semester at once, which might create storage problems on the Moodle container or our local laptop, it's best to repeat this process, doing a few courses at a time.
+
+Then, when you need a backup, `./backup retrieve $QUERY` retrieves it from the archive.
 
 ## Testing
 
