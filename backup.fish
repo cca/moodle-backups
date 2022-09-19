@@ -4,9 +4,9 @@ function usage -d 'describes how to use this script'
     echo "Backup Moodle course to Google Storage."
     echo -e "\nCommands:"
     echo -e "\t./$name mk COURSE1 [ COURSE2 COURSE3... ] - create a backup on the Moodle pod"
-    echo -e "\t./$name dl [ COURSE1 COURSE2... | --all ] - download specific, or all, backup files from the Moodle pod"
+    echo -e "\t./$name dl FILE1 [ FILE2 FILE3... | --all ] - download specific, or all, backup files from the Moodle pod"
     echo -e "\t./$name cp SEMESTER FILE1 [FILE2 FILE3...] - copy backup file(s) to SEMESTER folder in GSB"
-    echo -e "\t./$name rm COURSE - delete the backup file and course from the Moodle pod"
+    echo -e "\t./$name rm COURSE1 [ COURSE2 COURSE3... | --all ] - delete the backup file and course from the Moodle pod"
     echo -e "\t./$name ret QUERY - find & download the course backup from GSB"
     echo -e "\nFor additional usage information, use a -h or --help flag on any subcommand."
 end
