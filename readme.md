@@ -21,7 +21,7 @@ We'll also need access to the [Moodle Course Archive](https://console.cloud.goog
 The complete process to backup a full semester of Moodle courses to GSB:
 
 - create a list of courses to be backed up (see SQL folder & our reports)
-- `./backup create 1 2 3 4` backup courses from a list of IDs
+- `./backup mk 1 2 3 4` backup courses from a list of IDs
 - `./backup dl --all` download all the backup files to the data dir
 - `./backup cp $SEMESTER data/backup_*` transfer the files to GSB (note: try to avoid copying any test files in the data dir)
 - `./backup rm --all` delete the courses & their backups on the pod
