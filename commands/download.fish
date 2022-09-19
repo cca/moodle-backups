@@ -23,7 +23,7 @@ set BACKUPS_PATH bitnami/moodledata/backups
 
 if contains -- --all $argv
     echo "Downloading the contents of $BACKUPS_PATH"
-    kubectl cp $NS/$POD:$BACKUPS_PATH data
+    kubectl cp --retries=10 $NS/$POD:$BACKUPS_PATH data
 else
     for file in $argv
         # trim leading slash
@@ -31,10 +31,10 @@ else
         if string match "$BACKUPS_PATH*" $file 2&>/dev/null
             # full path was specified
             echo Downloading (basename $file)
-            kubectl cp $NS/$POD:$file data/(basename $file)
+            kubectl cp --retries=10 $NS/$POD:$file data/(basename $file)
         else
             echo "Downloading $file"
-            kubectl cp $NS/$POD:$BACKUPS_PATH/$file data/$file
+            kubectl cp --retries=10 $NS/$POD:$BACKUPS_PATH/$file data/$file
         end
     end
 end
