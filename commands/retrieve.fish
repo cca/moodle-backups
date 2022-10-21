@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 function usage
     set_color --bold
-    echo copy
+    echo retrieve
     set_color normal
     echo -e '\tbackup retrieve [-s, --semester TERM] QUERY\n'
     echo -e 'Find & download the course backup in GSB.\n'
