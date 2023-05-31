@@ -22,7 +22,7 @@ set -gx POD (get_pod)
 set BACKUPS_PATH /opt/moodledata/backups
 
 if contains -- --all $argv
-    echo "Downloading the contents of /$BACKUPS_PATH"
+    echo "Downloading the contents of $BACKUPS_PATH"
     kubectl --namespace $NS cp --retries=10 $POD:$BACKUPS_PATH data
 else
     for file in $argv
