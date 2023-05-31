@@ -14,7 +14,7 @@ Requires [fish shell](https://fishshell.com/), [gsutil](https://cloud.google.com
 > glcoud install gsutil kubectl
 ```
 
-We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters.
+We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters (a "staging" `kubectl` context for tests and a "production" `kubectl` context for actual backups).
 
 ## Workflow
 

@@ -32,7 +32,7 @@ end
 source ./lib/k8s.fish
 # run tests against the staging cluster
 set -gx NS moo-stg1
-set ctx gke_cca-web-staging_us-west1-b_ccaedu-stg
+set ctx staging
 if test (kubectl config current-context) != $ctx
     kubectl config set-context $ctx
 end
@@ -66,10 +66,17 @@ function download
         kubectl exec -n$NS $POD -- touch $BACKUPS_PATH/$file
     end
 
+    # using just file name
     ./backup.fish dl $file1
     ls data | grep $file1 >/dev/null
     check_result
     rm data/$file1
+
+    # using full path
+    ./backup.fish dl /opt/moodledata/backups/$file2
+    ls data | grep $file2 >/dev/null
+    check_result
+    rm data/$file2
 
     heading 'Download the entire backups folder from Moodle'
 

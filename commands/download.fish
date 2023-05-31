@@ -19,16 +19,13 @@ end
 source (status dirname)/../lib/k8s.fish
 check_namespace
 set -gx POD (get_pod)
-# no leading slash because `kubectl cp` will complain about it
-set BACKUPS_PATH opt/moodledata/backups
+set BACKUPS_PATH /opt/moodledata/backups
 
 if contains -- --all $argv
     echo "Downloading the contents of /$BACKUPS_PATH"
-    kubectl cp --retries=10 $NS/$POD:$BACKUPS_PATH data
+    kubectl --namespace $NS cp --retries=10 $POD:$BACKUPS_PATH data
 else
     for file in $argv
-        # trim leading slash
-        set file (string replace -r '^/' '' $file)
         if string match "$BACKUPS_PATH*" $file 2&>/dev/null
             # full path was specified
             echo Downloading (basename $file)
