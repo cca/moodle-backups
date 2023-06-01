@@ -16,19 +16,24 @@ Requires [fish shell](https://fishshell.com/), [gsutil](https://cloud.google.com
 
 We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters (a "staging" `kubectl` context for tests and a "production" `kubectl` context for actual backups).
 
-## Workflow
+## Semester Backup Workflow
 
-The complete process to backup a full semester of Moodle courses to GSB:
+After a semester concludes, run the [Backups Index Report](https://moodle.cca.edu/report/customsql/view.php?id=30) for it and append its results to the Backups Index in Drive.
 
-- create a list of courses to be backed up (see SQL folder & our reports)
-- `./backup mk 1 2 3 4` backup courses from a list of IDs
-- `./backup dl --all` download all the backup files to the data dir
-- `./backup cp $SEMESTER data/backup_*` transfer the files to GSB (note: try to avoid copying any test files in the data dir)
-- `./backup rm --all` delete the courses & their backups on the pod
+Two years after a semester has concluded, we can backup "used" courses in GSB and delete them from Moodle:
 
-Rather than doing an entire semester at once, which might create storage problems on the Moodle container or our local laptop, it's best to repeat this process, doing a few courses at a time.
+- consult the Backups Index to determine which courses to backup
+  - our criteria tends to factor in course usage, number of modules, and visibility
+  - export a list of course ID numbers (with no header row) and save it as data/ids.csv
+- run the included proc.fish script to iterate over ids.csv, its steps are
+  - `./backup mk 1234` backup a course
+  - `./backup dl --all` download all the backup files to the data dir
+  - `./backup cp $SEMESTER data/backup_*` transfer files to GSB (note: avoid copying any test files in the data dir)
+  - `./backup rm --all` delete the courses & their backups on the pod
 
-Then, when you need a backup, `./backup retrieve $QUERY` retrieves it from the archive.
+The proc.fish script is designed to fully process courses one at a time so as to limit the disk space impact on the Moodle container. However, every time a course is backed up, the .mbz backup file is stored in the Recycle Bin for a configurable amount of time (see [the settings](https://moodle.cca.edu/admin/settings.php?section=tool_recyclebin)). It may be necessary to pause sometimes until the bin is emptied. We can monitor these backup files with the [Backups in the Recycle Bin](https://moodle.cca.edu/report/customsql/view.php?id=15) report and the size of the "trashdir" directory underneath Moodle's data directory.
+
+When we need a backup, `./backup retrieve $QUERY` retrieves it from the archive.
 
 ## Testing
 
