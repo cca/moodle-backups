@@ -15,7 +15,7 @@ if string match --regex --quiet '[0-9]+' $argv[1]
 end
 
 set_color --bold
-echo (date) "Backing up $N courses from list of IDs in $IDFILE"
+echo (date) "Backing up $LINES courses from list of IDs in $IDFILE"
 set_color normal
 
 for id in (head -n $LINES $IDFILE)
@@ -24,7 +24,7 @@ for id in (head -n $LINES $IDFILE)
         ./backup.fish mk $id
         # @TODO if there's a random backup not created by this script it'll get
         # downloaded over & over; may need to catch the complete backup filename
-        # from the last script & download just that
+        # from the last command & download just that
         and ./backup.fish dl --all
         and ./backup.fish cp 2020FA data/backup_"$id"_*
         and ./backup.fish rm $id
@@ -32,14 +32,14 @@ for id in (head -n $LINES $IDFILE)
 
     if test $status -ne 0
         set_color red
-        echo (date) "ERROR: problem while backing up course $id" >$LOGFILE
+        echo (date) "ERROR: problem while backing up course $id" >>$LOGFILE
         set_color normal
     else
-        echo (date) "Successfully backed up course $id" >$LOGFILE
+        echo (date) "Successfully backed up course $id" >>$LOGFILE
         gsed -i -e "/^$id\$/d" $IDFILE
     end
 end
 
 set_color --bold
-echo (date) "Finished backing up $N courses."
+echo (date) "Finished backing up $LINES courses."
 set_color normal
