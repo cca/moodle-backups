@@ -25,8 +25,9 @@ for id in (head -n $LINES $IDFILE)
         # @TODO if there's a random backup not created by this script it'll get
         # downloaded over & over; may need to catch the complete backup filename
         # from the last command & download just that
-        and ./backup.fish dl --all
-        and ./backup.fish cp 2020FA data/backup_"$id"_*
+        and ./backup.fish dl --all | gsed -e '/tar: Removing leading/d'
+        # no way to disable gsutil progress indicator which fills the logs with garbage
+        and ./backup.fish cp 2020FA data/backup_"$id"_* | tail -n1
         and ./backup.fish rm $id
     end &>>$LOGFILE
 
