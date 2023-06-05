@@ -25,13 +25,65 @@ Two years after a semester has concluded, we can backup "used" courses in GSB an
 - consult the Backups Index to determine which courses to backup
   - our criteria tends to factor in course usage, number of modules, and visibility
   - export a list of course ID numbers (with no header row) and save it as data/ids.csv
+- use one of the included backup procedures below
+
+### In the cloud
+
+Setup:
+
+- create a GCP service account (IAM > Service Accounts) with no roles at the project level
+- download the key file for the SA (SA > "more" Actions > Manage keys)
+- give the SA the appropriate role on the course archive bucket (bucket > permissions, add the SA as the principle and choose the roles)
+  - for basic backups, just a Storage Object Creator role is enough
+  - in order to take advantage of faster composite uploads (recommended), the SA needs full Storage Object Admin because composite uploads need to read and delete objects in addition to creating them
+- transfer the key file to the pod (you can copy-paste it in `vim` or `kubectl cp`, it's named key.json below)
+- prepare the pod to use google cloud utilities
+  - Google has [official installation documentation](https://cloud.google.com/storage/docs/gsutil_install) that helps but, in my experience, didn't fully work
+
+```sh
+install_packages apt-transport-https ca-certificates gnupg curl
+echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg
+apt-key add /usr/share/keyrings/cloud.google.gpg
+install_packages google-cloud-cli
+gcloud auth activate-service-account --key-file key.json
+```
+
+Finally, to take advantage of composite uploads, you'll need to edit the service account's .boto file to add the properties described in the "gsutil composite objects & CRC Mod" section below.
+
+Once this is done, you can run the onpodproc.sh script on the container. It works like proc.fish below—backs up 5 courses (by default) at a time from the list of IDs in ids.csv and writes to a log file.
+
+### Via laptop
+
+This method is a little easier to manage but introduces an extra network transfer (pod -> laptop -> storage instead of pod -> storage) and tends to be much slower when running over a consumer internet connection with mediocre upload speeds.
+
 - run the included proc.fish script to iterate over ids.csv, its steps are
   - `./backup mk 1234` backup a course
   - `./backup dl --all` download all the backup files to the data dir
   - `./backup cp $SEMESTER data/backup_*` transfer files to GSB (note: avoid copying any test files in the data dir)
   - `./backup rm --all` delete the courses & their backups on the pod
 
-The proc.fish script is designed to fully process courses one at a time so as to limit the disk space impact on the Moodle container. However, every time a course is backed up, the .mbz backup file is stored in the Recycle Bin for a configurable amount of time (see [the settings](https://moodle.cca.edu/admin/settings.php?section=tool_recyclebin)). It may be necessary to pause sometimes until the bin is emptied. We can monitor these backup files with the [Backups in the Recycle Bin](https://moodle.cca.edu/report/customsql/view.php?id=15) report and the size of the "trashdir" directory underneath Moodle's data directory.
+### Backups in recycle bin
+
+Every time a course is backed up, the .mbz backup file is stored in the Recycle Bin for a configurable amount of time (see [the settings](https://moodle.cca.edu/admin/settings.php?section=tool_recyclebin)). It may be necessary to pause in the middle of a large number of backups sometimes until the bin is emptied. We can monitor these backup files with the [Backups in the Recycle Bin](https://moodle.cca.edu/report/customsql/view.php?id=15) report and the size of the "trashdir" directory underneath Moodle's data directory.
+
+### Deleted courses being recreated
+
+When we delete a course from Moodle, its enrollments still exist in the Moodle support database, and thus during the next enrollment sync they will be recreated. We don't want to delete all of the old term's enrollments out of the support db _before_ performing backups, because then users will be removed from the course and the backup that's created won't reflect the real enrollment. The best way to manage this is to piecemeal backup courses in chunks, removing their entries from the support db at the same time as you delete the courses in Moodle. Course categories are a convenient way of chunking courses and make it easier to delete things in bulk:
+
+```sh
+# say we've finished backing up course categories 100 - 105
+# categories are mostly numbered to match their alphabetical order but things like "metacourses" can be exceptions
+# on the Moodle container:
+for cat in (seq 100 105); do moosh -n category-delete $cat; done
+```
+
+```sql
+-- in the support db:
+DELETE FROM enrollments WHERE category_id IN (100, 101, 102, 103, 104, 105)
+```
+
+## Retrieving backups
 
 When we need a backup, `./backup retrieve $QUERY` retrieves it from the archive.
 
@@ -55,6 +107,7 @@ Tests run against the staging Moodle cluster. The ID for a particular course (36
 Check if a compiled CRC mod is available with `gsutil version -l` (it'll say "compiled crcmod: True"). If not, run `pip3 install -U crcmod` to install it. If pip claims it's already installed, it might not be running in the same python environment gsutil is using. Look at `gcloud info` for the Python Location and then run `$PYTHON_LOCATION -m pip install -U crcmod` (see [this comment](https://github.com/GoogleCloudPlatform/gsutil/issues/1123#issuecomment-772588861)). Finally, edit the .boto configuration file in your user's home directory to [enable parallel composite uploads](https://cloud.google.com/storage/docs/uploads-downloads#parallel-composite-uploads):
 
 ```ini
+[GSUtil]
 parallel_composite_upload_threshold = 100M
 parallel_composite_upload_component_size = 50M
 ```
