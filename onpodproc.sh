@@ -12,7 +12,7 @@ backup() {
     ID="$1"
     # gsutil has a progress indicator that cannot be turned off, we only want 1st & last line of output
     moosh --no-user-check --moodle-path ${MOODLE_PATH} course-backup --path ${BACKUPS_PATH} "${ID}" \
-        && gsutil cp /opt/moodledata/backups/backup_"${ID}"_* gs://moodle-course-archive/${SEMESTER}/ >/dev/null \
+        && gsutil cp /opt/moodledata/backups/backup_"${ID}"_* gs://moodle-course-archive/${SEMESTER}/ 2>&1 | (head -n1 && tail -n1) \
         && rm -v /opt/moodledata/backups/backup_"${ID}"_*
 }
 
