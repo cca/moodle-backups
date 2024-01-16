@@ -24,8 +24,11 @@ Two years after a semester has concluded, we can backup "used" courses in GSB an
 
 - consult the Backups Index to determine which courses to backup
   - our criteria tends to factor in course usage, number of modules, and visibility
+  - start with the Metacourses category (see below)
   - export a list of course ID numbers (with no header row) and save it as data/ids.csv
 - use one of the included backup procedures below
+
+We backup the Metacourses category first because we don't want to delete the composite sections before the parent metacourse, then the metacourse backup will lack enrollments and their associated student work.
 
 ### In the cloud
 
