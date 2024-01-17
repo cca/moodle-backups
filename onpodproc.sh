@@ -2,7 +2,7 @@
 # this requires adding google-cloud-cli to the pod & authenticating
 MOODLE_PATH=/bitnami/moodle
 BACKUPS_PATH=/opt/moodledata/backups
-SEMESTER="2020FA"
+SEMESTER="2021SP"
 IDFILE="ids.csv"
 LOGFILE="/bitnami/moodledata/backups.log"
 # LINES is a shell variable, can't use it

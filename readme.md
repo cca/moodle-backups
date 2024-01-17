@@ -2,7 +2,7 @@
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
-We replaced the old Google Drive archive of Moodle course backups with one stored in a Google Storage Bucket (GSB). Backup files are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB like this is to save money, make management easier (e.g. the lifecycle automation), and make backups more programmatically accessible. We have [a spreadsheet index](https://docs.google.com/spreadsheets/d/1mxO2PbKk088R9e3rU_XwUpxV_HwzIKBiIrK1xPy3zfU/edit?usp=sharing) of course backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
+Backups are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB is to save money, make management easier (e.g. the lifecycle automation), and make backups programmatically accessible. We have [a spreadsheet index](https://docs.google.com/spreadsheets/d/1mxO2PbKk088R9e3rU_XwUpxV_HwzIKBiIrK1xPy3zfU/edit?usp=sharing) of backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
 
 ## Setup
 
@@ -14,7 +14,7 @@ Requires [fish shell](https://fishshell.com/), [gsutil](https://cloud.google.com
 > glcoud install gsutil kubectl
 ```
 
-We'll also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters (a "staging" `kubectl` context for tests and a "production" `kubectl` context for actual backups).
+We also need access to the [Moodle Course Archive](https://console.cloud.google.com/storage/browser/moodle-course-archive;tab=objects?project=cca-web-0) storage bucket as well as all of the Moodle kubernetes clusters (a "staging" `kubectl` context for tests and a "production" `kubectl` context for actual backups).
 
 ## Semester Backup Workflow
 
@@ -30,18 +30,14 @@ Two years after a semester has concluded, we can backup "used" courses in GSB an
 
 We backup the Metacourses category first because we don't want to delete the composite sections before the parent metacourse, then the metacourse backup will lack enrollments and their associated student work.
 
-### In the cloud
+### In the cloud (recommended)
 
 Setup:
 
-- create a GCP service account (IAM > Service Accounts) with no roles at the project level
-- download the key file for the SA (SA > "more" Actions > Manage keys)
-- give the SA the appropriate role on the course archive bucket (bucket > permissions, add the SA as the principle and choose the roles)
-  - for basic backups, just a Storage Object Creator role is enough
-  - in order to take advantage of faster composite uploads (recommended), the SA needs full Storage Object Admin because composite uploads need to read and delete objects in addition to creating them
-- transfer the key file to the pod (you can copy-paste it in `vim` or `kubectl cp`, it's named key.json below)
-- prepare the pod to use google cloud utilities
-  - Google has [official installation documentation](https://cloud.google.com/storage/docs/gsutil_install) that helps but, in my experience, didn't fully work
+- in GCP, go to IAM > Service Accounts, find the `moodle-backups` service account (SA)
+- create a JSON key file for the SA ("more" Actions > Manage keys)
+- transfer the key file to the pod (e.g. `kubectl cp key.json POD:/bitnami/moodledata/key.json`)
+- prepare the pod to use google cloud utilities (Google has [official installation documentation](https://cloud.google.com/storage/docs/gsutil_install) that didn't fully work for me):
 
 ```sh
 install_packages apt-transport-https ca-certificates gnupg curl
@@ -49,16 +45,18 @@ echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/ap
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg
 apt-key add /usr/share/keyrings/cloud.google.gpg
 install_packages google-cloud-cli
-gcloud auth activate-service-account --key-file key.json
+gcloud auth activate-service-account --key-file /bitnami/moodledata/key.json
 ```
 
-Finally, to take advantage of composite uploads, you'll need to edit the service account's .boto file to add the properties described in the "gsutil composite objects & CRC Mod" section below.
+Finally, to take advantage of speedier composite uploads, you'll need to edit the service account's .boto file (located somewhere under /.config/gcloud/legacy_credentials/) to add the properties described in the "gsutil composite objects & CRC Mod" section below. The SA has Storage Object Admin permission on the course archive bucket in order to take advantage of composite uploads.
 
-Once this is done, you can run the onpodproc.sh script on the container. It works like proc.fish below—backs up 5 courses (by default) at a time from the list of IDs in ids.csv and writes to a log file.
+Once ready, run onpodproc.sh on the container. It backs up 5 courses (or `./onpodproc N` to backup N at a time) from the list of IDs in ids.csv and writes to a log file.
+
+It's best to delete the service account key (IAM > Service Accounts > moodle-backups > Manage Keys) when backups are done and to create a new key for the next time we need to backup courses.
 
 ### Via laptop
 
-This method is a little easier to manage but introduces an extra network transfer (pod -> laptop -> storage instead of pod -> storage) and tends to be much slower when running over a consumer internet connection with mediocre upload speeds.
+This method is a little easier to manage but introduces an extra network transfer (pod -> laptop -> storage instead of pod -> storage) and tends to be _much_ slower when running over a consumer internet connection with mediocre upload speeds.
 
 - run the included proc.fish script to iterate over ids.csv, its steps are
   - `./backup mk 1234` backup a course
@@ -70,7 +68,7 @@ This method is a little easier to manage but introduces an extra network transfe
 
 Every time a course is backed up, the .mbz backup file is stored in the Recycle Bin for a configurable amount of time (see [the settings](https://moodle.cca.edu/admin/settings.php?section=tool_recyclebin)). It may be necessary to pause in the middle of a large number of backups sometimes until the bin is emptied. We can monitor these backup files with the [Backups in the Recycle Bin](https://moodle.cca.edu/report/customsql/view.php?id=15) report and the size of the "trashdir" directory underneath Moodle's data directory.
 
-### Deleted courses being recreated
+### Deleted courses recreated
 
 When we delete a course from Moodle, its enrollments still exist in the Moodle support database, and thus during the next enrollment sync they will be recreated. We don't want to delete all of the old term's enrollments out of the support db _before_ performing backups, because then users will be removed from the course and the backup that's created won't reflect the real enrollment. The best way to manage this is to piecemeal backup courses in chunks, removing their entries from the support db at the same time as you delete the courses in Moodle. Course categories are a convenient way of chunking courses and make it easier to delete things in bulk:
 
