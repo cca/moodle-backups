@@ -32,3 +32,6 @@ done
 
 echo "$(date) Done backing up ${N} courses"
 } 2>&1 | tee -a $LOGFILE
+
+# fix file permissions because script was run as root
+nice find /opt/moodledata -type f -user root -exec chown daemon:daemon {} \;
