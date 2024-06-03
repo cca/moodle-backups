@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+set -euo pipefail # bash strice mode: stop on error, unset variables, or pipe fails
 # this requires adding google-cloud-cli to the pod & authenticating
 MOODLE_PATH=/bitnami/moodle
 BACKUPS_PATH=/opt/moodledata/backups
-SEMESTER="2021SU"
+SEMESTER="2021FA"
 IDFILE="ids.csv"
 LOGFILE="/bitnami/moodledata/backups.log"
 # LINES is a shell variable, can't use it
@@ -11,7 +12,7 @@ CONFIRM=${2}
 # use our timezone (for `date` commands)
 export TZ=America/Los_Angeles
 
-echo "$(date) Backing up first ${N} courses in ${IDFILE} to ${SEMESTER} folder in GSB"
+echo "Backing up first ${N} courses in ${IDFILE} to ${SEMESTER} folder in GSB, logs to ${LOGFILE}"
 
 # if CONFIRM looks like "yes" (y, yes, -y, -yes) then continue, otherwise confirm
 if [[ ! "$CONFIRM" =~ ^-?[yY](es)?$ ]]; then
@@ -28,7 +29,7 @@ backup() {
     # use `nice` to stop processes for taking up all the CPU from the running application
     # gsutil has a progress indicator that cannot be turned off, we only want 1st & last line of output
     nice moosh --no-user-check --moodle-path ${MOODLE_PATH} course-backup --path ${BACKUPS_PATH} "${ID}" \
-        && nice gsutil cp -m /opt/moodledata/backups/backup_"${ID}"_* gs://moodle-course-archive/${SEMESTER}/ 2>&1 | (head -n1 && tail -n1) \
+        && nice gsutil -m cp /opt/moodledata/backups/backup_"${ID}"_* gs://moodle-course-archive/${SEMESTER}/ 2>&1 | (head -n1 && tail -n1) \
         && nice rm -v /opt/moodledata/backups/backup_"${ID}"_*
 }
 
