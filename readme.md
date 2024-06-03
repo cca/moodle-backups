@@ -44,20 +44,20 @@ Setup:
 install_packages apt-transport-https ca-certificates gnupg curl
 echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg
-apt-key add /usr/share/keyrings/cloud.google.gpg
+apt-key add /usr/share/keyrings/cloud.google.gpg # TODO apt-key is deprecated
 install_packages google-cloud-cli
 gcloud auth activate-service-account --key-file /bitnami/moodledata/key.json
 ```
 
-Finally, to take advantage of speedier composite uploads, you'll need to edit the service account's .boto file (located somewhere under /.config/gcloud/legacy_credentials/) to add the properties described in the "gsutil composite objects & CRC Mod" section below. The SA has Storage Object Admin permission on the course archive bucket in order to take advantage of composite uploads.
+To take advantage of speedier composite uploads, we might need to edit the service account's .boto file (possibly located under /root/.config/gcloud/legacy_credentials/) to add the properties described in the "gsutil composite objects & CRC Mod" section below. The last time I installed `gcloud`, this did not require any extra steps, however. The SA has Storage Object Admin permission on the course archive bucket in order to take advantage of composite uploads.
 
-Once ready, run onpodproc.sh on the container. It backs up 5 courses (or `./onpodproc N` to backup N at a time) from the list of IDs in ids.csv and writes to a log file.
+Once ready, edit the `SEMESTER` variable at the top and then run onpodproc.sh on the container. It backs up 5 courses (or `./onpodproc N` to backup N at a time) from the list of IDs in ids.csv and writes to a log file.
 
-It's best to delete the service account key (IAM > Service Accounts > moodle-backups > Manage Keys) when backups are done and to create a new key for the next time we need to backup courses.
+It's best to delete the service account key (`rm /bitnami/moodledata/key.json` and IAM > Service Accounts > moodle-backups > Manage Keys) when backups are done and to create a new key the next time we backup courses.
 
 ### Via laptop
 
-This method is a little easier to manage but introduces an extra network transfer (pod -> laptop -> storage instead of pod -> storage) and tends to be _much_ slower when running over a consumer internet connection with mediocre upload speeds.
+This method is a little easier to manage but introduces an extra network transfer (pod -> laptop -> storage instead of pod -> storage) and is _much_ slower when running over a consumer internet connection with mediocre upload speeds.
 
 - run the included proc.fish script to iterate over ids.csv, its steps are
   - `./backup mk 1234` backup a course
