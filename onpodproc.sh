@@ -8,7 +8,7 @@ IDFILE="ids.csv"
 LOGFILE="/bitnami/moodledata/backups.log"
 # LINES is a shell variable, can't use it
 N=${1:-5}
-CONFIRM=${2}
+CONFIRM=${2-n}
 # use our timezone (for `date` commands)
 export TZ=America/Los_Angeles
 
