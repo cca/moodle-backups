@@ -49,7 +49,7 @@ install_packages google-cloud-cli
 gcloud auth activate-service-account --key-file /bitnami/moodledata/key.json
 ```
 
-To take advantage of speedier composite uploads, we might need to edit the service account's .boto file (possibly located under /root/.config/gcloud/legacy_credentials/) to add the properties described in the "gsutil composite objects & CRC Mod" section below. The last time I installed `gcloud`, this did not require any extra steps, however. The SA has Storage Object Admin permission on the course archive bucket in order to take advantage of composite uploads.
+To take advantage of speedier composite uploads, we might need to edit the service account's .boto file (/root/.boto) to add the properties described in the "gsutil composite objects & CRC Mod" section below. The last time I installed `gcloud`, it came with a compiled CRC Mod ready for these composite uploads. The SA has Storage Object Admin permission on the course archive bucket to take advantage of composite uploads.
 
 Once ready, edit the `SEMESTER` variable at the top and then run onpodproc.sh on the container. It backs up 5 courses (or `./onpodproc N` to backup N at a time) from the list of IDs in ids.csv and writes to a log file.
 
