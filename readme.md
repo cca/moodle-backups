@@ -2,6 +2,8 @@
 
 Backup old Moodle courses to a Google Storage Bucket with a slower storage class.
 
+**As of Fall 2024, we no longer back up courses to Google Storage.** We are using the objectfs plugin to store Moodle files directly in Google Storage with autoclass to move seldom-used files to a slower storage class. This eliminates the need for this backup process but backups from 2021SU and prior are still stored in GSB.
+
 Backups are stored initially in the "coldline" storage class, reduced to "archive" after 240 days, and then deleted after 730 days using GSB Lifecycle Rules. The goal of using GSB is to save money, make management easier (e.g. the lifecycle automation), and make backups programmatically accessible. We have [a spreadsheet index](https://docs.google.com/spreadsheets/d/1mxO2PbKk088R9e3rU_XwUpxV_HwzIKBiIrK1xPy3zfU/edit?usp=sharing) of backups in the Libraries' InST Shared Drive folder which is used to identify backups for retrieval.
 
 ## Setup
