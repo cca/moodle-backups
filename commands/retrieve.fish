@@ -22,8 +22,8 @@ switch $argv[1]
         exit
 
         # parse semester argument if it's present
-        # @TODO: contains code that's also in copy.fish so maybe
-        # this should be abstracted out into a lib function
+        # TODO: contains code that's also in copy.fish
+        # maybe should be abstracted out into a lib function
     case -s --semester
         set semester (string match -r '[0-9]{4}[A-Z]{2}' "$argv[2]")
         set query "$argv[3]"

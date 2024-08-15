@@ -4,7 +4,7 @@
 # where N is the number of backups to make
 
 # defaults
-# @TODO IDFILE should be a parameter, too
+# TODO IDFILE should be a parameter, too
 set IDFILE data/ids.csv
 set LINES 5
 set LOGFILE data/(dt).log
@@ -22,7 +22,7 @@ for id in (head -n $LINES $IDFILE)
     begin
         echo (date) "Backing up course $id"
         ./backup.fish mk $id
-        # @TODO if there's a random backup not created by this script it'll get
+        # TODO if there's a random backup not created by this script it'll get
         # downloaded over & over; may need to catch the complete backup filename
         # from the last command & download just that
         and ./backup.fish dl --all | gsed -e '/tar: Removing leading/d'
